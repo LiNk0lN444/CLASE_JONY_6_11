@@ -1,98 +1,137 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, SafeAreaView } from 'react-native';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+interface Registro { num: number; hora: string; }
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+export default function App() {
+  const [likes, setLikes] = useState(0);
+  const [historial, setHistorial] = useState<Registro[]>([]);
+
+  const sumar = () => {
+    const nuevoLike = likes + 1;
+    setLikes(nuevoLike);
+    const horaExacta = new Date().toLocaleTimeString('es-ES', { hour12: false });
+    setHistorial([{ num: nuevoLike, hora: horaExacta }, ...historial]);
+  };
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <SafeAreaView style={styles.fondo}>
+      <ScrollView contentContainerStyle={styles.contenedor}>
+        <View style={styles.tarjeta}>
+          
+          <Text style={styles.titulo}>Interactividad con el DOM</Text>
+          <Text style={styles.subtitulo}>
+            Haz clic para incrementar el contador y registrar la hora exacta.
+          </Text>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+          <Text style={styles.contador}>{likes}</Text>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+          <TouchableOpacity style={styles.boton} onPress={sumar}>
+            <Text style={styles.textoBoton}>¡Haz Clic Aquí!</Text>
+          </TouchableOpacity>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+          <View style={styles.tabla}>
+            <View style={styles.filaCabecera}>
+              <Text style={styles.cabecera}>Nº Clic</Text>
+              <Text style={styles.cabecera}>Hora</Text>
+            </View>
+            {historial.map((item, index) => (
+              <View key={index} style={styles.fila}>
+                <Text style={styles.celda}>{item.num}</Text>
+                <Text style={styles.celda}>{item.hora}</Text>
+              </View>
+            ))}
+          </View>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  fondo: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    backgroundColor: '#f4f6f8'
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
+  contenedor: {
+    padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    flexGrow: 1
   },
-  title: {
+  tarjeta: {
+    backgroundColor: '#fff',
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 10,
+    padding: 25,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 }
+  },
+  titulo: {
+    fontSize: 20,
+    fontWeight: 'bold',
     textAlign: 'center',
+    color: '#333'
   },
-  code: {
-    textTransform: 'uppercase',
+  subtitulo: {
+    fontSize: 13,
+    textAlign: 'center',
+    color: '#666',
+    marginVertical: 15
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  contador: {
+    fontSize: 60,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#007bff',
+    marginBottom: 15
   },
+  boton: {
+    backgroundColor: '#28a745',
+    paddingVertical: 12,
+    borderRadius: 6,
+    alignItems: 'center',
+    marginBottom: 25
+  },
+  textoBoton: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold'
+  },
+  tabla: {
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 4
+  },
+  filaCabecera: {
+    flexDirection: 'row',
+    backgroundColor: '#f8f9fa',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0'
+  },
+  cabecera: {
+    flex: 1,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: '#555',
+    fontSize: 13
+  },
+  fila: {
+    flexDirection: 'row',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee'
+  },
+  celda: {
+    flex: 1,
+    textAlign: 'center',
+    color: '#444',
+    fontSize: 14
+  }
 });
